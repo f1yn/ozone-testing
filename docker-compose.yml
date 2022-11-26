@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  core:
+    image: docker.io/denoland/deno:alpine-1.24.0
+    labels:
+      # Set so we can identify the core service without DNS hacks
+      - o3.core
+    container_name: o3-core
+    restart: always
+    volumes:
+      # Load in ozone prime deps
+      - ../ozone/:/ozone:ro
+      # ALso load in the services, automatically extract what we're working with from the manifest alone!
+      - ./docker-compose.yml:/services.yml:ro
+    secrets:
+      - source: o3_key
+    # Load the init, but allow reading from the services file
+    command: run --allow-read="/services.yml,/run/secrets/o3_key" --allow-net /ozone/core/init.ts
+  service-a:
+    image: docker.io/denoland/deno:alpine-1.24.0
+    container_name: o3-service-a
+    restart: always
+    volumes:
+      - ../ozone/:/ozone:ro
+      - ./service-a/:/service:ro
+    secrets:
+      - source: o3_key
+    command: run --allow-read="/run/secrets/o3_secret" /service/runtime.ts
+
+secrets:
+  o3_key:
+    file: ./test_secret.key
+
+networks:
+  default:
+    external:
+      name: ozone
