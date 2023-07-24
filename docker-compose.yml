@@ -13,6 +13,8 @@ services:
       - ../ozone/:/ozone:Z,ro
       # ALso load in the services, automatically extract what we're working with from the manifest alone!
       - ./docker-compose.yml:/services.yml:Z,ro
+      # Cache deps
+      - /deno-dir/deps
     secrets:
       - source: o3_key
     # Load the init, but allow reading from the services file
@@ -24,6 +26,8 @@ services:
     volumes:
       - ../ozone/:/ozone:Z,ro
       - ./service-a/:/service:Z,ro
+      # Cache deps
+      - /deno-dir/deps
     secrets:
       - source: o3_key
     command: run --allow-read="/run/secrets/o3_key" --allow-net /service/runtime.ts
@@ -33,7 +37,9 @@ services:
     restart: always
     volumes:
       - ../ozone/:/ozone:Z,ro
-      - ./service-a/:/service:Z,ro
+      - ./service-b/:/service:Z,ro
+      # Cache deps
+      - /deno-dir/deps
     secrets:
       - source: o3_key
     command: run --allow-read="/run/secrets/o3_key" --allow-net /service/runtime.ts
